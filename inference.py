@@ -432,7 +432,9 @@ class MarginalDirectedEvolutionDataset(Dataset):
     for t_idx, t in enumerate(self.orig_cols):
       for pos in range(self.num_positions):
         rows = [f'{nt} {pos}' for nt in self.alphabet]
-        marginals_tensor[t_idx][pos] = torch.Tensor(df[t].loc[rows])
+        # FIX: Reindex to include all rows, filling missing values with zero
+        data = df[t].reindex(rows, fill_value=0)
+        marginals_tensor[t_idx][pos] = torch.Tensor(data.values)
     marginals_tensor = marginals_tensor.reshape(self.num_timepoints, self.num_positions * self.len_alphabet)
     marginals_tensor /= self.num_positions
     return marginals_tensor
